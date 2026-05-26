@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovelForge — Create, Share, and Immerse in Web Novels</title>
+    <meta name="description" content="Discover, read, write, and self-publish beautiful web novels with custom generated covers, sepia reader customization, and detailed author stats.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+
+    <!-- Brightness Dimmer Screen Overlay Layer -->
+    <div class="dimmer-overlay" id="brightnessDimOverlay"></div>
+
+    <!-- Progress Indicator for Immersive Reader Mode -->
+    <div class="progress-bar-container" id="progressBarContainer" style="display: none;">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <a href="#" onclick="app.navigateTo('discover')" class="brand" id="brandLink">
+            <div class="brand-icon"></div>
+            NovelForge
+        </a>
+        <nav>
+            <a href="#" onclick="app.navigateTo('discover')" class="nav-link active" id="navDiscover">Browse</a>
+            <a href="#" onclick="app.navigateTo('library')" class="nav-link" id="navLibrary">Library</a>
+            <a href="#" onclick="app.navigateTo('genres')" class="nav-link" id="navGenres">Genres</a>
+            <a href="#" onclick="app.navigateTo('studio')" class="nav-link" id="navStudio">Studio</a>
+            <a href="#" onclick="app.navigateTo('me')" class="nav-link" id="navMe">Me</a>
+            
+            <!-- Wattpad Notification bell -->
+            <div class="nav-bell-wrapper">
+                <button onclick="app.toggleNotificationsDropdown()" class="nav-link" id="btnNotificationsBell" title="Notifications" style="padding: 0.5rem;">
+                    🔔 <span class="nav-bell-badge" id="notificationsBadgeCount" style="display: none;">0</span>
+                </button>
+                <!-- Bell dropdown list -->
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-header">
+                        <span>Notifications</span>
+                        <button onclick="app.clearNotifications()" style="font-size: 0.75rem; color: var(--color-accent); font-weight: 700;">Clear All</button>
+                    </div>
+                    <div class="notifications-list" id="notificationsList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="app.openAuthModal()" class="btn-primary" id="headerAuthBtn">Sign In</button>
+        </nav>
+    </header>
+
+    <main>
+        
+        <!-- ================= EXPLORE / DISCOVER VIEW ================= -->
+        <section id="viewDiscover" class="app-view active">
+            <div class="hero">
+                <div class="hero-glow"></div>
+                <h1>Where Stories Are <span>Forged</span></h1>
+                <p>Upload your epics, design beautiful covers, and read immersive web novels in a custom space built for storytellers.</p>
+                
+                <!-- Advanced Title Search Bar -->
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="novelSearchInput" class="search-box" placeholder="Search novels by title or author..." oninput="app.handleSearch()">
+                </div>
+            </div>
+
+            <!-- Library/Browse Section -->
+            <div id="browse-section">
+                
+                <!-- Wattpad-like Continue Reading Shelf -->
+                <div id="continueReadingSection" style="display: none; margin-bottom: 3rem;">
+                    <div class="section-title">
+                        <h2>📖 Continue Reading</h2>
+                        <span>Jump Back In</span>
+                    </div>
+                    <div class="continue-reading-grid" id="continueReadingGrid">
+                        <!-- Dynamically populated card items -->
+                    </div>
+                </div>
+
+                <!-- Genre Scroller -->
+                <div class="genre-scroller" id="genreFilterBar">
+                    <button class="genre-badge active" onclick="app.filterGenre('all')">All Stories</button>
+                    <button class="genre-badge" onclick="app.filterGenre('werewolf')">🐺 Werewolf</button>
+                    <button class="genre-badge" onclick="app.filterGenre('mafia')">🕴️ Mafia</button>
+                    <button class="genre-badge" onclick="app.filterGenre('marriage')">💍 Marriage</button>
+                    <button class="genre-badge" onclick="app.filterGenre('male lead')">👑 Male Lead</button>
+                    <button class="genre-badge" onclick="app.filterGenre('fantasy')">🐉 Fantasy</button>
+                    <button class="genre-badge" onclick="app.filterGenre('sci-fi')">🚀 Sci-Fi</button>
+                    <button class="genre-badge" onclick="app.filterGenre('romance')">💖 Romance</button>
+                </div>
+
+                <!-- Structured Categories -->
+                <div id="exploreCategories">
+                    <!-- Category 1: Most Engaging -->
+                    <div class="explore-category-section">
+                        <div class="section-title">
+                            <h2>🔥 Most Engaging</h2>
+                            <span>Top Reads</span>
+                        </div>
+                        <div class="novel-grid" id="categoryEngagingGrid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Category 2: Top Ranked -->
+                    <div class="explore-category-section">
+                        <div class="section-title">
+                            <h2>⭐ Top Ranked</h2>
+                            <span>Highly Reviewed</span>
+                        </div>
+                        <div class="novel-grid" id="categoryRankedGrid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Category 3: Completed Classics -->
+                    <div class="explore-category-section">
+                        <div class="section-title">
+                            <h2>🎓 Completed Stories</h2>
+                            <span>Finished Epics</span>
+                        </div>
+                        <div class="novel-grid" id="categoryCompletedGrid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fallback Grid for Genre Filtering & Search Queries -->
+                <div id="searchResultsSection" style="display: none;">
+                    <div class="section-title">
+                        <h2 id="searchGridTitle">Search Results</h2>
+                    </div>
+                    <div class="novel-grid" id="searchNovelGrid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MY LIBRARY VIEW ================= -->
+        <section id="viewLibrary" class="app-view">
+            <div class="section-title">
+                <h2>My Personal Library</h2>
+                <span>Saved Books</span>
+            </div>
+
+            <!-- Library Tabs -->
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="app.switchLibraryTab('reading')">Reading</button>
+                <button class="tab-btn" onclick="app.switchLibraryTab('unread')">Unread</button>
+                <button class="tab-btn" onclick="app.switchLibraryTab('completed')">Completed</button>
+                <button class="tab-btn" onclick="app.switchLibraryTab('expired')">Finished & Expired</button>
+            </div>
+
+            <!-- Library Grid -->
+            <div class="novel-grid" id="libraryNovelGrid">
+                <!-- Dynamically populated books -->
+            </div>
+        </section>
+
+        <!-- ================= GENRES VIEW ================= -->
+        <section id="viewGenres" class="app-view">
+            <div class="section-title">
+                <h2>Browse by Genre</h2>
+                <span>Select Category</span>
+            </div>
+
+            <div class="genres-grid">
+                <div class="genre-card" onclick="app.selectGenreView('werewolf')" style="background-color: #3b1361;">
+                    <h3>🐺 Werewolf</h3>
+                    <div class="genre-icon">🌑</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('mafia')" style="background-color: #660e1b;">
+                    <h3>🕴️ Mafia</h3>
+                    <div class="genre-icon">💼</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('marriage')" style="background-color: #8c5d1e;">
+                    <h3>💍 Marriage</h3>
+                    <div class="genre-icon">💐</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('male lead')" style="background-color: #173859;">
+                    <h3>👑 Male Lead</h3>
+                    <div class="genre-icon">🛡️</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('fantasy')" style="background-color: #104c3e;">
+                    <h3>🐉 Fantasy</h3>
+                    <div class="genre-icon">🧙‍♂️</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('sci-fi')" style="background-color: #1f2a44;">
+                    <h3>🚀 Sci-Fi</h3>
+                    <div class="genre-icon">🌌</div>
+                </div>
+                <div class="genre-card" onclick="app.selectGenreView('romance')" style="background-color: #7a153b;">
+                    <h3>💖 Romance</h3>
+                    <div class="genre-icon">🥀</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= NOVEL DETAILS VIEW ================= -->
+        <section id="viewDetails" class="app-view">
+            <button onclick="app.navigateTo('discover')" class="btn-secondary" style="margin-bottom: 2rem;">
+                ← Back to Browse
+            </button>
+
+            <div class="novel-detail-layout" id="novelDetailLayout">
+                <!-- Dynamic detail rendering in app.js -->
+            </div>
+        </section>
+
+        <!-- ================= WRITER'S STUDIO VIEW ================= -->
+        <section id="viewStudio" class="app-view">
+            <!-- If Guest (Not Signed In) -->
+            <div class="wizard-container align-center" id="studioGuestContainer" style="display: none; padding: 4rem 2rem;">
+                <span style="font-size: 4rem; display: block; margin-bottom: 1.5rem;">✍️</span>
+                <h2 class="section-title justify-center" style="margin-bottom: 1rem;">Join the <span>Writer's Circle</span></h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    Unlock the Writer's Studio to upload novels, design covers, manage drafts, and upload chapters directly for your readers.
+                </p>
+                <button onclick="app.openAuthModal()" class="btn-primary" style="padding: 0.85rem 2.5rem;">Sign In / Sign Up to Write</button>
+            </div>
+
+            <!-- If Signed In: Author Dashboard -->
+            <div id="studioAuthorDashboard" style="display: none;">
+                <div class="section-title">
+                    <h2>Writer Dashboard</h2>
+                    <button onclick="app.showNovelWizard()" class="btn-primary">➕ Write New Novel</button>
+                </div>
+                
+                <h3 style="margin-bottom: 1.25rem; font-size: 1.25rem; color: var(--text-secondary);">Your Published Novels</h3>
+                <div class="novel-grid" id="studioAuthorNovelsGrid">
+                    <!-- Populated dynamically with the author's books -->
+                </div>
+            </div>
+
+            <!-- Multi-Step Novel Creation Wizard -->
+            <div class="wizard-container" id="studioCreateWizard" style="display: none;">
+                <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
+                    <div class="flex items-center gap-1">
+                        <h3 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-accent); margin-bottom: 0;">New Story Setup</h3>
+                        <span id="draftAutosaveStatus" style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">(Draft Saved)</span>
+                    </div>
+                    <button onclick="app.exitNovelWizard()" class="btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Cancel</button>
+                </div>
+
+                <div class="wizard-steps">
+                    <div class="wizard-step active" id="stepIndicator1">1</div>
+                    <div class="wizard-step" id="stepIndicator2">2</div>
+                    <div class="wizard-step" id="stepIndicator3">3</div>
+                </div>
+
+                <!-- Step 1: Basic Details -->
+                <div id="wizardStep1" class="wizard-content-panel">
+                    <h2 class="section-title">Forge Your Novel — <span>Step 1: Details</span></h2>
+                    
+                    <div class="form-group">
+                        <label for="novelTitle">Novel Title</label>
+                        <input type="text" id="novelTitle" class="form-input" placeholder="e.g., Rise of the Alpha King" required oninput="app.triggerAutosaveDraft()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novelAuthor">Author Pseudonym</label>
+                        <input type="text" id="novelAuthor" class="form-input" placeholder="e.g., PenDragon" required disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novelGenre">Core Genre</label>
+                        <select id="novelGenre" class="form-select" required onchange="app.triggerAutosaveDraft()">
+                            <option value="" disabled selected>Select Genre</option>
+                            <option value="werewolf">🐺 Werewolf</option>
+                            <option value="mafia">🕴️ Mafia</option>
+                            <option value="marriage">💍 Marriage</option>
+                            <option value="male lead">👑 Male Lead</option>
+                            <option value="fantasy">🐉 Fantasy</option>
+                            <option value="sci-fi">🚀 Sci-Fi</option>
+                            <option value="romance">💖 Romance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="novelSynopsis">Synopsis / Description</label>
+                        <textarea id="novelSynopsis" class="form-textarea" placeholder="Describe the thrilling plot of your web novel..." required oninput="app.triggerAutosaveDraft()"></textarea>
+                    </div>
+
+                    <!-- Mature Content 18+ Block -->
+                    <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="checkbox" id="novelMature" style="width: 18px; height: 18px; cursor: pointer;" onchange="app.triggerAutosaveDraft()">
+                        <label for="novelMature" style="margin-bottom: 0; cursor: pointer; color: var(--color-danger);">🔞 18+ Mature Content Warning (NSFW)</label>
+                    </div>
+                </div>
+
+                <!-- Step 2: Cover Designer -->
+                <div id="wizardStep2" class="wizard-content-panel" style="display: none;">
+                    <h2 class="section-title">Forge Your Novel — <span>Step 2: Cover</span></h2>
+
+                    <!-- Mode Toggle Group -->
+                    <div class="mode-toggle-group">
+                        <button type="button" class="mode-toggle-btn active" id="btnModeDesign" onclick="app.setCoverMode('design')">Interactive Designer</button>
+                        <button type="button" class="mode-toggle-btn" id="btnModeUpload" onclick="app.setCoverMode('upload')">Upload Cover Image</button>
+                    </div>
+                    
+                    <div class="designer-layout">
+                        <!-- Preview Cover -->
+                        <div>
+                            <label>Live Cover Preview</label>
+                            <div class="cover-preview-box" id="coverDesignerPreview">
+                                <!-- Dynamic styled cover mockup generated here -->
+                            </div>
+                        </div>
+
+                        <!-- Styling Settings -->
+                        <div>
+                            <!-- Design Config options -->
+                            <div id="coverDesignerConfig">
+                                <div class="form-group">
+                                    <label>Background Gradient Scheme</label>
+                                    <div class="palette-selectors" id="coverPaletteSelectors"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Emblem Representation</label>
+                                    <div class="emblem-selectors" id="coverEmblemSelectors"></div>
+                                </div>
+                            </div>
+
+                            <!-- Upload Config option -->
+                            <div id="coverUploadConfig" style="display: none;">
+                                <div class="form-group">
+                                    <label>Upload Image File (JPG/PNG)</label>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn-secondary" style="width: 100%;">📁 Select Image File</button>
+                                        <input type="file" id="coverFileInput" accept="image/*" onchange="app.handleCoverUpload(event)">
+                                    </div>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">Recommended aspect ratio 5:7 for absolute clarity.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Write Chapter -->
+                <div id="wizardStep3" class="wizard-content-panel" style="display: none;">
+                    <h2 class="section-title">Forge Your Novel — <span>Step 3: Chapter 1</span></h2>
+                    
+                    <div class="form-group">
+                        <label for="chapterTitle">Chapter 1 Title</label>
+                        <input type="text" id="chapterTitle" class="form-input" placeholder="e.g., Prologue: The Awakening" required oninput="app.triggerAutosaveDraft()">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+                            <label for="chapterContent" style="margin-bottom: 0;">Chapter Content</label>
+                            <span id="wordCounter" style="font-size: 0.85rem; color: var(--text-muted);">Words: 0</span>
+                        </div>
+                        <textarea id="chapterContent" class="form-textarea" style="min-height: 280px;" placeholder="Once upon a time, in a moonlit glade..." oninput="app.countWords(); app.triggerAutosaveDraft();"></textarea>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="wizard-nav">
+                    <button type="button" class="btn-secondary" id="btnWizardPrev" style="visibility: hidden;" onclick="app.prevWizardStep()">Back</button>
+                    <button type="button" class="btn-primary" id="btnWizardNext" onclick="app.nextWizardStep()">Continue</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= IMMERSIVE READER VIEW ================= -->
+        <section id="viewReader" class="app-view">
+            <div class="reader-wrapper">
+                
+                <!-- Chapter Header -->
+                <div class="reader-header">
+                    <div>
+                        <h3 id="readerNovelTitle">Rise of the Alpha King</h3>
+                        <h2 id="readerChapterTitle">Chapter 1: The Gathering Storm</h2>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <!-- Chapter Likes / Votes button -->
+                        <button onclick="app.toggleChapterLike()" class="btn-secondary" id="btnChapterLike" style="padding: 0.5rem;" title="Vote Chapter">⭐ Vote</button>
+                        <!-- Novel downloader -->
+                        <button onclick="app.downloadNovel()" class="btn-secondary" style="padding: 0.5rem;" title="Download Novel">📥 Download</button>
+                        <button onclick="app.exitReader()" class="btn-secondary" style="padding: 0.5rem;">Exit</button>
+                    </div>
+                </div>
+
+                <!-- Main Reading Frame -->
+                <article class="reader-text-container font-serif" id="readerTextContent">
+                    <!-- Text paragraphs dynamically injected by app.js -->
+                </article>
+
+                <!-- Chapter Navigation -->
+                <div class="reader-footer" id="readerNavigationFooter">
+                    <button onclick="app.navigateChapter('prev')" class="btn-secondary" id="btnReaderPrevChapter">← Previous Chapter</button>
+                    <button onclick="app.navigateChapter('next')" class="btn-primary" id="btnReaderNextChapter">Next Chapter →</button>
+                </div>
+
+                <!-- Chapter Comment widget -->
+                <div class="comment-section-box" id="chapterCommentsContainer">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.5rem;">Chapter Discussion</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">Share your thoughts about this chapter with other readers.</p>
+                    
+                    <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <textarea id="chapterCommentInput" class="form-textarea" style="min-height: 80px;" placeholder="Post a constructive comment..."></textarea>
+                        <button onclick="app.postChapterComment()" class="btn-primary" style="align-self: flex-end;">Post Comment</button>
+                    </div>
+
+                    <div class="comment-list" id="chapterCommentsList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom floating adjustments controls -->
+            <div class="reader-controls">
+                
+                <!-- Theme Swatcher Toggle -->
+                <button class="reader-control-btn" id="btnSettingsMenu" title="Reader Settings" onclick="app.toggleSettingsMenu()">⚙️</button>
+                
+                <!-- Font family select (Serif / Sans) -->
+                <button class="reader-control-btn" onclick="app.toggleReaderFont()" title="Switch Font Style">🔤</button>
+                
+                <!-- Font size decrease -->
+                <button class="reader-control-btn" onclick="app.adjustFontSize(-1)" title="Decrease Size">A-</button>
+                
+                <!-- Font size increase -->
+                <button class="reader-control-btn" onclick="app.adjustFontSize(1)" title="Increase Size">A+</button>
+                
+                <!-- Floating Settings Popup Menu -->
+                <div class="settings-menu" id="readerSettingsMenu">
+                    <div class="setting-option">
+                        <span>Theme Swatch</span>
+                        <div class="theme-swatches">
+                            <button class="theme-swatch" style="background-color: #090D16;" onclick="app.setReaderTheme('dark')" title="Dark Theme"></button>
+                            <button class="theme-swatch" style="background-color: #F8FAFC; border: 1px solid #CCC;" onclick="app.setReaderTheme('light')" title="Light Theme"></button>
+                            <button class="theme-swatch" style="background-color: #F4EBD0;" onclick="app.setReaderTheme('sepia')" title="Sepia Theme"></button>
+                        </div>
+                    </div>
+
+                    <!-- Hands-Free Auto-Scroll adjust speed -->
+                    <div class="setting-option">
+                        <span>Auto-Scroll (Hands-Free)</span>
+                        <div class="flex items-center gap-1">
+                            <button id="btnAutoScrollToggle" class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="app.toggleAutoScroll()">Start</button>
+                            <select id="selectAutoScrollSpeed" class="form-select" style="width: auto; padding: 0.15rem 0.3rem; font-size: 0.75rem;" onchange="app.adjustAutoScrollSpeed(this.value)">
+                                <option value="35">Slow</option>
+                                <option value="25" selected>Comfortable</option>
+                                <option value="15">Fast</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Brightness dimmer light control -->
+                    <div class="setting-option">
+                        <span>Adjust Light</span>
+                        <div class="flex items-center gap-1">
+                            <span style="font-size: 0.8rem;">🔆</span>
+                            <input type="range" min="0" max="80" value="0" class="brightness-slider" id="brightnessControlSlider" oninput="app.adjustReaderBrightness(this.value)">
+                            <span style="font-size: 0.8rem;">🌙</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-option">
+                        <span>Line Spacing</span>
+                        <select onchange="app.adjustLineHeight(this.value)" class="form-select" style="width: auto; padding: 0.25rem 0.5rem;">
+                            <option value="1.5">Compact</option>
+                            <option value="1.75" selected>Comfortable</option>
+                            <option value="2.0">Relaxed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PROFILE ("ME") VIEW ================= -->
+        <section id="viewMe" class="app-view">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="meProfileAvatar">👤</div>
+                    <div class="profile-title">
+                        <h3 id="meProfileName">Guest Reader</h3>
+                        <p id="meProfileStatus">Sign up to sync library and track reading times.</p>
+                    </div>
+                </div>
+
+                <div class="profile-stats-grid">
+                    <div class="profile-stat-box">
+                        <h4 id="meStatLibraryCount">0</h4>
+                        <p>In Library</p>
+                    </div>
+                    <div class="profile-stat-box">
+                        <h4 id="meStatReadsCount">0</h4>
+                        <p>Chapters Read</p>
+                    </div>
+                    <div class="profile-stat-box">
+                        <h4 id="meStatFollowersCount">0</h4>
+                        <p>Followers</p>
+                    </div>
+                    <div class="profile-stat-box">
+                        <h4 id="meStatTimeSpent">0 min</h4>
+                        <p>Time Spent</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center">
+                    <button class="btn-primary" id="meAuthActionBtn" onclick="app.openAuthModal()">Sign In / Sign Up</button>
+                </div>
+
+                <!-- Admin Moderation Queue Dashboard -->
+                <div id="adminModerationPanel" style="display: none; border-top: 1px solid var(--border-color); margin-top: 2.5rem; padding-top: 2rem;">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-danger); margin-bottom: 0.5rem;">🛡️ Admin Moderation Queue</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Review violations flagged by reader reports on the platform.</p>
+                    <div id="adminReportList" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Populate reported books dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Floating Account Sign In / Sign Up Overlay Modal -->
+    <div class="modal-overlay" id="authModalOverlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="app.closeAuthModal()">&times;</span>
+            <div id="authDialogSignIn">
+                <h2 class="section-title" style="margin-bottom: 1.5rem;">Sign In to <span>NovelForge</span></h2>
+                <div class="form-group">
+                    <label for="authLoginUser">Username</label>
+                    <input type="text" id="authLoginUser" class="form-input" placeholder="Enter username">
+                </div>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="authLoginPass">Password</label>
+                    <input type="password" id="authLoginPass" class="form-input" placeholder="••••••••">
+                </div>
+                <button onclick="app.handleSignIn()" class="btn-primary" style="width: 100%; padding: 0.75rem;">Login</button>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center; color: var(--text-secondary);">
+                    Don't have an account? <a href="#" onclick="app.toggleAuthForm('signup')" style="color: var(--color-secondary); font-weight: 700;">Create Account</a>
+                </p>
+            </div>
+            
+            <div id="authDialogSignUp" style="display: none;">
+                <h2 class="section-title" style="margin-bottom: 1.5rem;">Join <span>NovelForge</span></h2>
+                <div class="form-group">
+                    <label for="authRegisterUser">Choose Username</label>
+                    <input type="text" id="authRegisterUser" class="form-input" placeholder="e.g. NovelKing">
+                </div>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="authRegisterPass">Choose Password</label>
+                    <input type="password" id="authRegisterPass" class="form-input" placeholder="••••••••">
+                </div>
+                <button onclick="app.handleSignUp()" class="btn-primary" style="width: 100%; padding: 0.75rem;">Create Account</button>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center; color: var(--text-secondary);">
+                    Already registered? <a href="#" onclick="app.toggleAuthForm('signin')" style="color: var(--color-secondary); font-weight: 700;">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Overlay Modal for Editing Novels -->
+    <div class="modal-overlay" id="editNovelModalOverlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="app.closeEditNovelModal()">&times;</span>
+            <h2 class="section-title" style="margin-bottom: 1.5rem;">Edit <span>Novel Details</span></h2>
+            <div class="form-group">
+                <label for="editNovelTitle">Novel Title</label>
+                <input type="text" id="editNovelTitle" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="editNovelGenre">Genre</label>
+                <select id="editNovelGenre" class="form-select" required>
+                    <option value="werewolf">🐺 Werewolf</option>
+                    <option value="mafia">🕴️ Mafia</option>
+                    <option value="marriage">💍 Marriage</option>
+                    <option value="male lead">👑 Male Lead</option>
+                    <option value="fantasy">🐉 Fantasy</option>
+                    <option value="sci-fi">🚀 Sci-Fi</option>
+                    <option value="romance">💖 Romance</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editNovelSynopsis">Synopsis / Description</label>
+                <textarea id="editNovelSynopsis" class="form-textarea" required style="min-height: 100px;"></textarea>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <input type="checkbox" id="editNovelCompleted" style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="editNovelCompleted" style="margin-bottom: 0; cursor: pointer;">Mark Novel as Completed</label>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem;">
+                <input type="checkbox" id="editNovelMatureToggle" style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="editNovelMatureToggle" style="margin-bottom: 0; cursor: pointer; color: var(--color-danger);">18+ Mature Content (NSFW)</label>
+            </div>
+            <button onclick="app.saveNovelEdits()" class="btn-primary" style="width: 100%; padding: 0.75rem;">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Floating Overlay Modal for Adding Chapters -->
+    <div class="modal-overlay" id="addChapterModalOverlay">
+        <div class="modal-box" style="max-width: 540px;">
+            <span class="modal-close" onclick="app.closeAddChapterModal()">&times;</span>
+            <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+                <h2 class="section-title" style="margin-bottom: 0;">Add <span>New Chapter</span></h2>
+                <span id="addChapterAutosaveStatus" style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">(Autosaved)</span>
+            </div>
+            <div class="form-group">
+                <label for="addChapterTitle">Chapter Title</label>
+                <input type="text" id="addChapterTitle" class="form-input" placeholder="e.g. Chapter 2: The Confrontation" required oninput="app.triggerAutosaveDraft()">
+            </div>
+            <div class="form-group">
+                <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+                    <label for="addChapterContent" style="margin-bottom: 0;">Chapter Content</label>
+                    <span id="addChapterWordCounter" style="font-size: 0.8rem; color: var(--text-muted);">Words: 0</span>
+                </div>
+                <textarea id="addChapterContent" class="form-textarea" required style="min-height: 200px;" placeholder="Continue your story here..." oninput="app.countAddChapterWords(); app.triggerAutosaveDraft();"></textarea>
+            </div>
+            <button onclick="app.saveNewChapter()" class="btn-primary" style="width: 100%; padding: 0.75rem;">Publish Chapter</button>
+        </div>
+    </div>
+
+    <!-- Floating Overlay Modal for Editing Published Chapters -->
+    <div class="modal-overlay" id="editChapterModalOverlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <span class="modal-close" onclick="app.closeEditChapterModal()">&times;</span>
+            <h2 class="section-title" style="margin-bottom: 1.5rem;">Edit <span>Chapter text</span></h2>
+            
+            <div class="form-group">
+                <label for="selectEditChapter">Select Chapter to Rewrite</label>
+                <select id="selectEditChapter" class="form-select" onchange="app.handleSelectEditChapterChange(this.value)">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editChapterTitleInput">Chapter Title</label>
+                <input type="text" id="editChapterTitleInput" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+                    <label for="editChapterContentInput" style="margin-bottom: 0;">Chapter Content</label>
+                    <span id="editChapterWordCounter" style="font-size: 0.8rem; color: var(--text-muted);">Words: 0</span>
+                </div>
+                <textarea id="editChapterContentInput" class="form-textarea" required style="min-height: 240px;" oninput="app.countEditChapterWords()"></textarea>
+            </div>
+            <button onclick="app.saveChapterEdits()" class="btn-primary" style="width: 100%; padding: 0.75rem;">Save Chapter Edits</button>
+        </div>
+    </div>
+
+    <!-- Floating Overlay Modal for Submitting Violation Reports -->
+    <div class="modal-overlay" id="reportStoryModalOverlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="app.closeReportModal()">&times;</span>
+            <h2 class="section-title">⚠️ Report <span>Story Violation</span></h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Help us protect artists and users by reporting plagiarised text, extreme hate, or harassment.
+            </p>
+            <div class="form-group">
+                <label for="reportReason">Reason for Report</label>
+                <select id="reportReason" class="form-select">
+                    <option value="copyright">Copyright Infringement / Plagiarism</option>
+                    <option value="hate">Hate Speech / Harassment</option>
+                    <option value="spam">Spam / Advertising Scams</option>
+                    <option value="other">Other / Severe Violations</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reportComments">Violation Details</label>
+                <textarea id="reportComments" class="form-textarea" required style="min-height: 100px;" placeholder="Identify plagiarised sources, page lines, or violent excerpts..."></textarea>
+            </div>
+            <button onclick="app.submitReport()" class="btn-primary" style="width: 100%; padding: 0.75rem; background: var(--color-danger);">Submit Violation Report</button>
+        </div>
+    </div>
+
+    <!-- Mature NSFW Blurred Reading Barrier Screen Overlay -->
+    <div class="modal-overlay" id="matureContentBarrierOverlay" style="display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); z-index: 100000;">
+        <div class="modal-box align-center" style="max-width: 460px;">
+            <span style="font-size: 4rem; display: block; margin-bottom: 1rem;">🔞</span>
+            <h2 class="section-title justify-center" style="margin-bottom: 1rem; color: var(--color-danger);">Mature Content Alert</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.5;">
+                This story is marked as Mature (18+) and contains themes, violence, or language meant solely for adult readers. By proceeding, you verify you are of age.
+            </p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="app.acceptMatureWarning()" class="btn-primary" style="background: var(--color-danger); padding: 0.75rem 2rem;">Proceed (18+)</button>
+                <button onclick="app.exitReader()" class="btn-secondary" style="padding: 0.75rem 2rem;">Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="margin-top: auto; padding: 2rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+        <p>&copy; 2026 NovelForge. Created with absolute passion for reading and writing.</p>
+    </footer>
+
+    <!-- App Engine JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
